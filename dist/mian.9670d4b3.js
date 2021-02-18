@@ -11288,45 +11288,99 @@ return jQuery;
 },{"process":"C:/Users/86178/AppData/Local/Yarn/Data/global/node_modules/process/browser.js"}],"app1.js":[function(require,module,exports) {
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
 require("./app1.css");
 
-var _jquery = _interopRequireDefault(require("jquery"));
+var _jquery = _interopRequireWildcard(require("jquery"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
-var $button1 = (0, _jquery.default)('#add1');
-var $button2 = (0, _jquery.default)('#minus1');
-var $button3 = (0, _jquery.default)('#mul2');
-var $button4 = (0, _jquery.default)('#divide2');
-var $number = (0, _jquery.default)('#number'); //初始化local
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-var n = localStorage.getItem("n");
-$number.text(n || 100);
-$button1.on('click', function () {
-  var n = parseInt($number.text());
-  n += 1; //把数字存放在localStorage中,保存浏览器中的值
+//一个监听事件的函数方法 ？？
+var eventBus = (0, _jquery.default)(window); //数据相关  m
 
-  localStorage.setItem("n", n);
-  $number.text(n);
-});
-$button2.on('click', function () {
-  var n = parseInt($number.text());
-  n -= 1;
-  localStorage.setItem("n", n);
-  $number.text(n);
-});
-$button3.on('click', function () {
-  var n = parseInt($number.text());
-  n *= 2;
-  localStorage.setItem("n", n);
-  $number.text(n);
-});
-$button4.on('click', function () {
-  var n = parseInt($number.text());
-  n /= 2;
-  localStorage.setItem("n", n);
-  $number.text(n);
-});
+var m = {
+  data: {
+    //初始化数据local
+    n: parseInt(localStorage.getItem("n"))
+  },
+  create: function create() {},
+  delete: function _delete() {},
+  update: function update(data) {
+    Object.assign(m.data, data);
+    eventBus.trigger('m:updated');
+    localStorage.setItem('n', m.data.n);
+  },
+  get: function get() {}
+}; //视图相关  v
+
+var v = {
+  el: null,
+  html: "\n    <div>\n        <div class=\"output\">\n            <span id=\"number\">{{n}}</span>\n        </div>\n        <div class=\"actions\">\n            <button id=\"add1\">+1</button>\n            <button id=\"minus1\">-1</button>\n            <button id=\"mul2\">*2</button>\n            <button id=\"divide2\">\xF72</button>\n        </div>\n    </div>\n    ",
+  init: function init(container) {
+    v.el = (0, _jquery.default)(container);
+  },
+  render: function render(n) {
+    if (v.el.children.length != 0) v.el.empty();
+    (0, _jquery.default)(v.html.replace('{{n}}', n)).appendTo(v.el);
+  }
+}; //其他  c
+
+var c = {
+  init: function init(container) {
+    //第一次渲染html
+    v.init(container);
+    v.render(m.data.n);
+    c.autoBindEvents();
+    eventBus.on('m:updated', function () {
+      v.render(m.data.n);
+    });
+  },
+  events: {
+    'click #add1': 'add',
+    'click #minus1': 'minus',
+    'click #mul2': 'mul',
+    'click #divide2': 'div'
+  },
+  add: function add() {
+    m.update({
+      n: m.data.n + 1
+    });
+  },
+  minus: function minus() {
+    m.update({
+      n: m.data.n -= 1
+    });
+  },
+  mul: function mul() {
+    m.update({
+      n: m.data.n *= 2
+    });
+  },
+  div: function div() {
+    m.update({
+      n: m.data.n /= 2
+    });
+  },
+  autoBindEvents: function autoBindEvents() {
+    for (var key in c.events) {
+      var value = c[c.events[key]];
+      var spaceIndex = key.indexOf(' ');
+      var part1 = key.slice(0, spaceIndex);
+      var part2 = key.slice(spaceIndex);
+      console.log(part1, part2);
+      v.el.on(part1, part2, value);
+    }
+  }
+}; //初始化 把c导出
+
+var _default = c;
+exports.default = _default;
 },{"./app1.css":"app1.css","jquery":"../node_modules/jquery/dist/jquery.js"}],"app2.css":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
 
@@ -11341,17 +11395,23 @@ var _jquery = _interopRequireDefault(require("jquery"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var html = "\n<section id=\"app2\">\n<ol class=\"tab-bar\">\n    <li>1</li>\n    <li>2</li>\n</ol>\n<ol class=\"tab-content\">\n    <li>\u5185\u5BB91</li>\n    <li>\u5185\u5BB92</li>\n</ol>\n</section>\n";
+var $element = (0, _jquery.default)(html).appendTo((0, _jquery.default)('body>.page'));
 var $tabBar = (0, _jquery.default)("#app2 .tab-bar");
-var $tabContent = (0, _jquery.default)("#app2 .tab-content");
+var $tabContent = (0, _jquery.default)("#app2 .tab-content"); //设置一个localkey来存放对应的li的点击值
+
+var localkey = 'app2.index';
+var index = localStorage.getItem(localkey) || 0;
 $tabBar.on("click", "li", function (e) {
   //currentTarget是选择对应的父元素？
   var $li = (0, _jquery.default)(e.currentTarget);
   $li.addClass("selected").siblings().removeClass("selected");
   var index = $li.index();
+  localStorage.setItem(localkey, index);
   $tabContent.children().eq(index).addClass('active').siblings().removeClass('active');
-}); //默认触发就是1
+}); //默认触发就是对应的index
 
-$tabBar.children().eq(0).trigger('click');
+$tabBar.children().eq(index).trigger('click');
 },{"./app2.css":"app2.css","jquery":"../node_modules/jquery/dist/jquery.js"}],"app3.css":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
 
@@ -11366,10 +11426,24 @@ var _jquery = _interopRequireDefault(require("jquery"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var html = "\n        <section id=\"app3\">\n            <div class=\"square\"></div>\n        </section>\n";
+var $element = (0, _jquery.default)(html).appendTo((0, _jquery.default)('body>.page'));
 var $square = (0, _jquery.default)('#app3 .square');
+var localKey = 'app3.active'; //简写，如果有就返回true,没有就返回no
+
+var active = localStorage.getItem(localKey) === 'yes'; //这就话就是读取到刷新后active的状态,保存上面简写的返回值
+
+$square.toggleClass('active', active);
 $square.on('click', function () {
-  //toggleClass是检测列表中是否有对应class命名，如果有删除，没有添加
-  $square.toggleClass('active');
+  if ($square.hasClass('active')) {
+    $square.removeClass('active');
+    localStorage.setItem(localKey, 'no');
+  } else {
+    $square.addClass('active');
+    localStorage.setItem('app3.active', 'yes');
+  } //toggleClass是检测列表中是否有对应class命名，如果有删除，没有添加
+  //$square.toggleClass('active');
+
 });
 },{"./app3.css":"app3.css","jquery":"../node_modules/jquery/dist/jquery.js"}],"app4.css":[function(require,module,exports) {
 var reloadCSS = require('_css_loader');
@@ -11385,6 +11459,8 @@ var _jquery = _interopRequireDefault(require("jquery"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var html = "\n<section id=\"app4\">\n<div class=\"circle\"></div>\n</section>\n";
+var $element = (0, _jquery.default)(html).appendTo((0, _jquery.default)('body>.page'));
 var $circle = (0, _jquery.default)('#app4 .circle');
 $circle.on('mouseenter', function () {
   $circle.addClass('active');
@@ -11398,13 +11474,17 @@ require("./reset.css");
 
 require("./global.css");
 
-require("./app1.js");
+var _app = _interopRequireDefault(require("./app1.js"));
 
 require("./app2.js");
 
 require("./app3.js");
 
 require("./app4.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_app.default.init('#app1');
 },{"./reset.css":"reset.css","./global.css":"global.css","./app1.js":"app1.js","./app2.js":"app2.js","./app3.js":"app3.js","./app4.js":"app4.js"}],"C:/Users/86178/AppData/Local/Yarn/Data/global/node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -11433,7 +11513,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52634" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64508" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
